@@ -3,7 +3,13 @@ import React, { useEffect, useState } from "react";
 import FileList from "./FileList";
 import { FileItemType } from "./FileItem";
 import { Button } from "@/components/ui/button";
-import { Trash2, FolderOpen, X } from "lucide-react";
+import {
+  Trash2,
+  FolderOpen,
+  X,
+  LayoutGrid,
+  List as ListIcon,
+} from "lucide-react";
 import { useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -29,6 +35,7 @@ export default function FileExplorer() {
   const [showBatchDelete, setShowBatchDelete] = useState(false);
   const [showBatchMove, setShowBatchMove] = useState(false);
   const [moveDestination, setMoveDestination] = useState("");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   // Function to refresh the file/folder list and storage usage
   const refreshItems = async () => {
@@ -230,6 +237,38 @@ export default function FileExplorer() {
           </Button>
         )}
       </h2>
+      {/* Grid/List Toggle - always visible above file list */}
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-zinc-400 text-sm font-medium">View:</span>
+        <button
+          className={`p-2 rounded-lg ${
+            viewMode === "list" ? "bg-blue-700/20" : "hover:bg-zinc-800"
+          } transition`}
+          title="List view"
+          aria-label="List view"
+          onClick={() => setViewMode("list")}
+        >
+          <ListIcon
+            className={`w-5 h-5 ${
+              viewMode === "list" ? "text-blue-400" : "text-zinc-400"
+            }`}
+          />
+        </button>
+        <button
+          className={`p-2 rounded-lg ${
+            viewMode === "grid" ? "bg-blue-700/20" : "hover:bg-zinc-800"
+          } transition`}
+          title="Grid view"
+          aria-label="Grid view"
+          onClick={() => setViewMode("grid")}
+        >
+          <LayoutGrid
+            className={`w-5 h-5 ${
+              viewMode === "grid" ? "text-blue-400" : "text-zinc-400"
+            }`}
+          />
+        </button>
+      </div>
       <div className="border-b border-zinc-700/60 mb-6" />
       {/* Sticky batch actions bar */}
       <AnimatePresence>
@@ -384,38 +423,16 @@ export default function FileExplorer() {
         <span className="text-zinc-100 text-base font-medium">Select All</span>
       </div>
       <div className="overflow-x-auto">
-        <motion.ul
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: {},
-          }}
-          className="space-y-2"
-        >
-          {items.map((item, idx) => (
-            <motion.li
-              key={item.Key}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05 * idx, duration: 0.4, ease: "easeOut" }}
-              whileHover={{
-                scale: 1.02,
-                boxShadow: "0 2px 8px 0 rgba(161,205,244,0.10)",
-              }}
-            >
-              <FileList
-                items={[item]}
-                onRefresh={refreshItems}
-                selectedKeys={selectedKeys}
-                toggleSelect={toggleSelect}
-                highlightSelected
-                showFolderUsage
-                formatBytes={formatBytes}
-              />
-            </motion.li>
-          ))}
-        </motion.ul>
+        <FileList
+          items={items}
+          onRefresh={refreshItems}
+          selectedKeys={selectedKeys}
+          toggleSelect={toggleSelect}
+          highlightSelected
+          showFolderUsage
+          formatBytes={formatBytes}
+          viewMode={viewMode}
+        />
       </div>
       <div className="mt-10 sm:mt-12 bg-zinc-900/80 rounded-2xl p-4 sm:p-6 border border-zinc-800/60 shadow-lg">
         <div className="text-zinc-100 text-lg sm:text-xl font-bold mb-4">

@@ -7,14 +7,14 @@ const client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY as string,
     secretAccessKey: process.env.AWS_SECRET_KEY as string,
   },
-  region: "eu-north-1",
+  region: process.env.AWS_REGION || "eu-north-1",
 });
 
 export async function OPTIONS() {
   return new NextResponse(null, {
     status: 204,
     headers: {
-      "Access-Control-Allow-Origin": "http://localhost:3000",
+      "Access-Control-Allow-Origin": process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
       "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, HEAD, OPTIONS",
       "Access-Control-Allow-Headers": "*",
       "Access-Control-Expose-Headers": "ETag",
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     console.log("Content-Type for presigned URL:", contentType);
 
     const command = new PutObjectCommand({
-      Bucket: "s3ui--bucket",
+      Bucket: process.env.AWS_BUCKET_NAME || "s3ui--bucket",
       Key: key,
       ContentType: contentType,
     });

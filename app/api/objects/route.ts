@@ -12,7 +12,7 @@ const client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY as string,
     secretAccessKey: process.env.AWS_SECRET_KEY as string,
   },
-  region: "eu-north-1",
+  region: process.env.AWS_REGION || "eu-north-1",
 });
 
 // API route to list objects and folders in the S3 bucket
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   // List objects and folders at the given prefix
   const command = new ListObjectsV2Command({
-    Bucket: "s3ui--bucket",
+    Bucket: process.env.AWS_BUCKET_NAME || "s3ui--bucket",
     Delimiter: "/",
     Prefix: normalizedPrefix,
   });

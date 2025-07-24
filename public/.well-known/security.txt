@@ -1,0 +1,6 @@
+# Security Policy
+Contact: mailto:security@yourdomain.com
+Expires: 2025-01-01T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://yourdomain.com/.well-known/security.txt
+Policy: https://yourdomain.com/security-policy

@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# S3UI - Modern S3 File Explorer
+
+S3UI is a modern, user-friendly interface for managing your AWS S3 bucket files and folders. Built with Next.js and secured with Clerk authentication, it provides an intuitive way to browse, upload, download, and manage your S3 objects.
+
+## Features
+
+- 🔐 Secure authentication with Clerk
+- 📁 Intuitive file and folder browsing
+- ⬆️ Easy file uploads with drag-and-drop support
+- ⬇️ Direct file downloads
+- 🗑️ Delete files and folders
+- 📊 Storage usage statistics
+- 🎨 Modern UI with responsive design
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.x or later
+- AWS S3 bucket and credentials
+- Clerk account for authentication
+
+### Development Setup
+
+1. Clone the repository
+2. Copy `.env.example` to `.env.local` and fill in your credentials
+3. Install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+```
+
+4. Run the development server:
+
+```bash
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The following environment variables are required:
 
-## Learn More
+```
+# S3 Configuration
+AWS_ACCESS_KEY=your_aws_access_key
+AWS_SECRET_KEY=your_aws_secret_key
+AWS_REGION=eu-north-1
+AWS_BUCKET_NAME=s3ui--bucket
 
-To learn more about Next.js, take a look at the following resources:
+# Clerk Authentication
+CLERK_SECRET_KEY=your_clerk_secret_key
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Next.js
+NEXT_PUBLIC_APP_URL=https://your-deployment-url.com
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+### Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The easiest way to deploy S3UI is to use the [Vercel Platform](https://vercel.com/new):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Push your code to a Git repository (GitHub, GitLab, Bitbucket)
+2. Import the project into Vercel
+3. Add all required environment variables in the Vercel project settings
+4. Deploy
+
+### Deploy with Docker
+
+S3UI can also be deployed using Docker:
+
+1. Build the Docker image:
+
+```bash
+docker build -t s3ui .
+```
+
+2. Run the container:
+
+```bash
+docker run -p 3000:3000 --env-file .env.local s3ui
+```
+
+### Other Deployment Options
+
+You can also deploy S3UI on any platform that supports Node.js applications:
+
+1. Build the application:
+
+```bash
+pnpm build
+```
+
+2. Start the production server:
+
+```bash
+pnpm start
+```
+
+## Security Considerations
+
+- Always use environment variables for sensitive information
+- Set up proper IAM policies for your AWS credentials
+- Configure CORS settings on your S3 bucket
+- Use HTTPS for production deployments

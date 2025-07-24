@@ -11,7 +11,7 @@ const client = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY as string,
     secretAccessKey: process.env.AWS_SECRET_KEY as string,
   },
-  region: "eu-north-1",
+  region: process.env.AWS_REGION || "eu-north-1",
 });
 
 // In-memory activity log
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       // List all objects under the folder
       const list = await client.send(
         new ListObjectsV2Command({
-          Bucket: "s3ui--bucket",
+          Bucket: process.env.AWS_BUCKET_NAME || "s3ui--bucket",
           Prefix: key,
         })
       );
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       if (objects.length > 0) {
         await client.send(
           new DeleteObjectsCommand({
-            Bucket: "s3ui--bucket",
+            Bucket: process.env.AWS_BUCKET_NAME || "s3ui--bucket",
             Delete: { Objects: objects.map((obj) => ({ Key: obj.Key! })) },
           })
         );
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       // Delete single file
       await client.send(
         new DeleteObjectCommand({
-          Bucket: "s3ui--bucket",
+          Bucket: process.env.AWS_BUCKET_NAME || "s3ui--bucket",
           Key: key,
         })
       );
