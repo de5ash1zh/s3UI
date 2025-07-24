@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  ListObjectsV2Command,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 
 // Initialize S3 client with credentials and region
 const client = new S3Client({
@@ -72,4 +76,27 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     items: [...folderItems, ...rootFiles],
   });
+}
+
+// POST handler to create a new folder (empty object with trailing slash)
+export async function POST(request: NextRequest) {
+  const prefix = request.nextUrl.searchParams.get("prefix");
+  if (!prefix || !prefix.endsWith("/")) {
+    return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+  }
+  try {
+    const command = new PutObjectCommand({
+      Bucket: "s3ui--bucket",
+      Key: prefix, // S3 treats keys ending with / as folders
+      Body: "",
+    });
+    await client.send(command);
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Error creating folder:", err);
+    return NextResponse.json(
+      { error: "Failed to create folder" },
+      { status: 500 }
+    );
+  }
 }
