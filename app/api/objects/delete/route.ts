@@ -5,6 +5,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
 } from "@aws-sdk/client-s3";
+import { logDelete } from "@/lib/activityLogger";
 
 const client = new S3Client({
   credentials: {
@@ -13,10 +14,6 @@ const client = new S3Client({
   },
   region: process.env.AWS_REGION || "eu-north-1",
 });
-
-// In-memory activity log
-export const activityLog: any[] =
-  globalThis._activityLog || (globalThis._activityLog = []);
 
 export async function POST(request: NextRequest) {
   const { key, isFolder } = await request.json();
@@ -42,11 +39,7 @@ export async function POST(request: NextRequest) {
         );
         // Log each deleted object
         for (const obj of objects) {
-          activityLog.push({
-            type: "delete",
-            key: obj.Key,
-            timestamp: Date.now(),
-          });
+          logDelete(obj.Key!);
         }
       }
     } else {
@@ -58,7 +51,7 @@ export async function POST(request: NextRequest) {
         })
       );
       // Log the delete
-      activityLog.push({ type: "delete", key, timestamp: Date.now() });
+      logDelete(key);
     }
     return NextResponse.json({ success: true });
   } catch (err) {

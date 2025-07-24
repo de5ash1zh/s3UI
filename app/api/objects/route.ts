@@ -4,7 +4,6 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
-import { activityLog } from "./delete/route";
 
 // Initialize S3 client with credentials and region
 const client = new S3Client({
@@ -85,10 +84,7 @@ export async function GET(request: NextRequest) {
   });
 }
 
-// Add a handler for /api/objects/activity
-export async function GET_ACTIVITY(request: NextRequest) {
-  return NextResponse.json({ log: activityLog.slice(-100).reverse() }); // last 100 actions, most recent first
-}
+// Activity logs are now handled in /api/objects/activity/route.ts
 
 // POST handler to create a new folder (empty object with trailing slash)
 export async function POST(request: NextRequest) {
