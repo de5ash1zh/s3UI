@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import FolderIcon from "@/components/ui/folder-icon";
 import FileIcon from "@/components/ui/file-icon";
 import { motion, AnimatePresence } from "framer-motion";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Download } from "lucide-react";
 import ReactDOM from "react-dom";
 
 // Type definition for a file or folder item
@@ -153,6 +153,21 @@ const FileItem: React.FC<{
     }
   };
 
+  // Handler for downloading a file
+  const handleDownload = async () => {
+    // Get a pre-signed URL for the file
+    const res = await fetch(
+      `/api/objects/download?key=${encodeURIComponent(item.Key)}`
+    );
+    const data = await res.json();
+    if (data.url) {
+      window.open(data.url, "_blank");
+    } else {
+      // Optionally handle error (e.g., show a toast)
+      alert("Failed to generate download link");
+    }
+  };
+
   // Handler for drag start
   const handleDragStart = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -244,6 +259,7 @@ const FileItem: React.FC<{
             {(item.Size / 1024).toFixed(1)} KB
           </span>
         )}
+        {/* Download button removed */}
         {/* Rename button */}
         {!renaming && (
           <button
@@ -268,31 +284,34 @@ const FileItem: React.FC<{
           <Trash2 className="w-4 h-4 text-red-400" />
         </button>
         {/* Delete confirmation dialog */}
-        {showDeleteConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-6 shadow-xl flex flex-col items-center">
-              <div className="text-zinc-100 mb-4 text-center">
-                Are you sure you want to delete{" "}
-                <span className="font-bold">{item.Key}</span>?<br />
-                This cannot be undone.
+        {showDeleteConfirm &&
+          typeof window !== "undefined" &&
+          ReactDOM.createPortal(
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-6 shadow-xl flex flex-col items-center">
+                <div className="text-zinc-100 mb-4 text-center">
+                  Are you sure you want to delete{" "}
+                  <span className="font-bold">{item.Key}</span>?<br />
+                  This cannot be undone.
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    className="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </button>
+                  <button
+                    className="px-4 py-1 rounded bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
+                    onClick={() => setShowDeleteConfirm(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-4">
-                <button
-                  className="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700"
-                  onClick={handleDelete}
-                >
-                  Delete
-                </button>
-                <button
-                  className="px-4 py-1 rounded bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-                  onClick={() => setShowDeleteConfirm(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
       </div>
     );
   }
@@ -417,31 +436,34 @@ const FileItem: React.FC<{
             <Trash2 className="w-4 h-4 text-red-400" />
           </button>
           {/* Delete confirmation dialog */}
-          {showDeleteConfirm && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-6 shadow-xl flex flex-col items-center">
-                <div className="text-zinc-100 mb-4 text-center">
-                  Are you sure you want to delete{" "}
-                  <span className="font-bold">{item.Key}</span>?<br />
-                  This cannot be undone.
+          {showDeleteConfirm &&
+            typeof window !== "undefined" &&
+            ReactDOM.createPortal(
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-6 shadow-xl flex flex-col items-center">
+                  <div className="text-zinc-100 mb-4 text-center">
+                    Are you sure you want to delete{" "}
+                    <span className="font-bold">{item.Key}</span>?<br />
+                    This cannot be undone.
+                  </div>
+                  <div className="flex gap-4">
+                    <button
+                      className="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700"
+                      onClick={handleDelete}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="px-4 py-1 rounded bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
+                      onClick={() => setShowDeleteConfirm(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-4">
-                  <button
-                    className="px-4 py-1 rounded bg-red-600 text-white hover:bg-red-700"
-                    onClick={handleDelete}
-                  >
-                    Delete
-                  </button>
-                  <button
-                    className="px-4 py-1 rounded bg-zinc-700 text-zinc-100 hover:bg-zinc-600"
-                    onClick={() => setShowDeleteConfirm(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+              </div>,
+              document.body
+            )}
         </div>
         {/* Upload error message */}
         {uploadError && (

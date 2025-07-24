@@ -7,6 +7,7 @@ import {
   DeleteObjectsCommand,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { activityLog } from "../delete/route";
 
 const client = new S3Client({
   credentials: {
@@ -49,6 +50,13 @@ export async function POST(request: NextRequest) {
             Key: destKey,
           })
         );
+        // Log the move
+        activityLog.push({
+          type: "move",
+          oldKey: srcKey,
+          newKey: destKey,
+          timestamp: Date.now(),
+        });
       }
       // Delete all old objects (except placeholder)
       if (objects.length > 0) {
@@ -89,6 +97,8 @@ export async function POST(request: NextRequest) {
           Key: oldKey,
         })
       );
+      // Log the move
+      activityLog.push({ type: "move", oldKey, newKey, timestamp: Date.now() });
     }
     return NextResponse.json({ success: true });
   } catch (err) {

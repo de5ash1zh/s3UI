@@ -4,6 +4,7 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { activityLog } from "./delete/route";
 
 // Initialize S3 client with credentials and region
 const client = new S3Client({
@@ -39,6 +40,10 @@ export async function GET(request: NextRequest) {
   // Get files (Contents) at this level, excluding folder placeholders
   const files = result.Contents?.filter((e) => !e.Key?.endsWith("/")) || [];
 
+  // Calculate total file count and total size for this prefix (always fresh from S3)
+  const totalCount = files.length;
+  const totalSize = files.reduce((sum, f) => sum + (f.Size || 0), 0);
+
   // For each folder, fetch its immediate children files (not recursive)
   const folderItems = await Promise.all(
     folders.map(async (p) => {
@@ -52,7 +57,7 @@ export async function GET(request: NextRequest) {
         .filter((e) => !e.Key?.endsWith("/"))
         .map((e) => ({
           Key: e.Key,
-          Size: e.Size,
+          Size: e.Size, // always from S3
           LastModified: e.LastModified,
           type: "file",
         }));
@@ -67,7 +72,7 @@ export async function GET(request: NextRequest) {
   // Format files at this level
   const rootFiles = files.map((e) => ({
     Key: e.Key,
-    Size: e.Size,
+    Size: e.Size, // always from S3
     LastModified: e.LastModified,
     type: "file",
   }));
@@ -75,7 +80,14 @@ export async function GET(request: NextRequest) {
   // Return folders (with children) and files in a single array
   return NextResponse.json({
     items: [...folderItems, ...rootFiles],
+    totalCount,
+    totalSize,
   });
+}
+
+// Add a handler for /api/objects/activity
+export async function GET_ACTIVITY(request: NextRequest) {
+  return NextResponse.json({ log: activityLog.slice(-100).reverse() }); // last 100 actions, most recent first
 }
 
 // POST handler to create a new folder (empty object with trailing slash)

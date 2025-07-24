@@ -14,6 +14,10 @@ const client = new S3Client({
   region: "eu-north-1",
 });
 
+// In-memory activity log
+export const activityLog: any[] =
+  globalThis._activityLog || (globalThis._activityLog = []);
+
 export async function POST(request: NextRequest) {
   const { key, isFolder } = await request.json();
   if (!key) {
@@ -36,6 +40,14 @@ export async function POST(request: NextRequest) {
             Delete: { Objects: objects.map((obj) => ({ Key: obj.Key! })) },
           })
         );
+        // Log each deleted object
+        for (const obj of objects) {
+          activityLog.push({
+            type: "delete",
+            key: obj.Key,
+            timestamp: Date.now(),
+          });
+        }
       }
     } else {
       // Delete single file
@@ -45,6 +57,8 @@ export async function POST(request: NextRequest) {
           Key: key,
         })
       );
+      // Log the delete
+      activityLog.push({ type: "delete", key, timestamp: Date.now() });
     }
     return NextResponse.json({ success: true });
   } catch (err) {
