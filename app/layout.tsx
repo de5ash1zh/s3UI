@@ -32,16 +32,18 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className="dark">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black min-h-screen`}
         >
-          <SignedOut>
-            <div className="min-h-screen min-w-screen flex items-center justify-center">
-              <SignIn routing="hash" />
-            </div>
-          </SignedOut>
-          <SignedIn>{children}</SignedIn>
+          <div className="bg-zinc-950 min-h-screen">
+            <SignedOut>
+              <div className="min-h-screen min-w-screen flex items-center justify-center">
+                <SignIn routing="hash" />
+              </div>
+            </SignedOut>
+            <SignedIn>{children}</SignedIn>
+          </div>
         </body>
       </html>
     </ClerkProvider>

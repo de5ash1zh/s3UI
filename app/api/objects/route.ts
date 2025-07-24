@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { S3Client, ListObjectsV2Command } from "@aws-sdk/client-s3";
 
+// Initialize S3 client with credentials and region
 const client = new S3Client({
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY as string,
@@ -9,7 +10,9 @@ const client = new S3Client({
   region: "eu-north-1",
 });
 
+// API route to list objects and folders in the S3 bucket
 export async function GET(request: NextRequest) {
+  // Get the prefix (folder path) from the query string
   const prefix = request.nextUrl.searchParams.get("prefix") ?? "";
   // Ensure prefix ends with / if not empty
   const normalizedPrefix = prefix
@@ -17,6 +20,8 @@ export async function GET(request: NextRequest) {
       ? prefix
       : `${prefix}/`
     : "";
+
+  // List objects and folders at the given prefix
   const command = new ListObjectsV2Command({
     Bucket: "s3ui--bucket",
     Delimiter: "/",
@@ -24,13 +29,13 @@ export async function GET(request: NextRequest) {
   });
   const result = await client.send(command);
 
-  // Get root-level folders
+  // Get folders (CommonPrefixes) at this level
   const folders = result.CommonPrefixes || [];
 
-  // Get root-level files
+  // Get files (Contents) at this level, excluding folder placeholders
   const files = result.Contents?.filter((e) => !e.Key?.endsWith("/")) || [];
 
-  // For each folder, fetch its children files (not recursive)
+  // For each folder, fetch its immediate children files (not recursive)
   const folderItems = await Promise.all(
     folders.map(async (p) => {
       const folderCommand = new ListObjectsV2Command({
@@ -55,7 +60,7 @@ export async function GET(request: NextRequest) {
     })
   );
 
-  // Format root files
+  // Format files at this level
   const rootFiles = files.map((e) => ({
     Key: e.Key,
     Size: e.Size,
@@ -63,6 +68,7 @@ export async function GET(request: NextRequest) {
     type: "file",
   }));
 
+  // Return folders (with children) and files in a single array
   return NextResponse.json({
     items: [...folderItems, ...rootFiles],
   });
