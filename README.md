@@ -99,10 +99,3 @@ pnpm build
 ```bash
 pnpm start
 ```
-
-## Security Considerations
-
-- Always use environment variables for sensitive information
-- Set up proper IAM policies for your AWS credentials
-- Configure CORS settings on your S3 bucket
-- Use HTTPS for production deployments
